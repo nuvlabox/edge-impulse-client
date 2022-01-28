@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  edge-impulse-collector:
+    build: .
+    devices:
+      - /dev/video0
+    environment:
+      - VIDEO_DEVICE=/dev/video0
+      - EDGE_IMPULSE_API_KEY=
+      - EDGE_IMPULSE_HMAC_KEY=
