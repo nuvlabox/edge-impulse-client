@@ -3,9 +3,13 @@ version: '3'
 services:
   edge-impulse-collector:
     build: .
+    command: --collection-strategy=MANUAL_AUTO
+    network_mode: host
     devices:
       - /dev/video0
     environment:
       - VIDEO_DEVICE=/dev/video0
       - EDGE_IMPULSE_API_KEY=
       - EDGE_IMPULSE_HMAC_KEY=
+      - LABEL_NAME_IDENTIFIER=nuvlabox-ei-collector
+      - COLLECTION_INTERVAL=10
