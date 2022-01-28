@@ -11,6 +11,7 @@ from threading import Event
 
 
 INGESTION_API = 'https://ingestion.edgeimpulse.com'
+
 video_device = os.getenv('VIDEO_DEVICE', '/dev/video0')
 assert os.path.exists(video_device), f'Cannot find video device {video_device}'
 
@@ -25,7 +26,6 @@ interval = int(os.getenv('COLLECTION_INTERVAL', '10'))
 def generate_metadata(image_file):
     with open(image_file, 'rb') as ifile:
         image = ifile.read()
-
     img_length = len(image)
 
     hmac_img = hmac.new(ei_hmac_key.encode(), image, hashlib.sha256)
@@ -57,7 +57,7 @@ def generate_metadata(image_file):
     with open(metadata_file, 'w') as md:
         md.write(json.dumps(data))
 
-    return metadata_file, json.dumps(data)
+    return metadata_file
 
 
 cap = cv2.VideoCapture("/dev/video0")
@@ -73,16 +73,22 @@ while True:
     img_name = f'{label_name}_{int(start)}.jpg'
     cv2.imwrite(img_name,frame)
 
-    metadata_file, metadata = generate_metadata(img_name)
+    metadata_file = generate_metadata(img_name)
 
     headers['x-file-name'] = img_name
-    files = {img_name: (img_name, open(img_name, "rb"), 'image/jpeg'),
-             metadata_file: ('', metadata, 'application/json')}
+    files = {metadata_file: (metadata_file, open(metadata_file), 'application/json'),
+             img_name: (img_name, open(img_name, "rb"), 'image/jpeg')}
 
     r = requests.post(f'{INGESTION_API}/api/training/data',
                       headers=headers,
                       files=files
                       )
+
+    try:
+        os.remove(img_name)
+    except:
+        # not a reason to stop
+        pass
 
     end = time.time()
     delta = end - start

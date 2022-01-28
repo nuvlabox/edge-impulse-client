@@ -30,7 +30,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
     sox \
     libjpeg8-dev
 
-RUN pip3 install meson
+RUN pip3 install meson requests
 
 RUN wget https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.19.3.tar.xz \
     && tar xvfJ gstreamer-1.19.3.tar.xz > /dev/null \
@@ -67,3 +67,9 @@ RUN apt remove -y ninja-build wget \
     && apt clean \
     && apt autoremove -y --purge \
     && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt
+
+COPY collect-and-upload.py start-collector.sh ./
+
+ENTRYPOINT ["./start-collector.sh"]
