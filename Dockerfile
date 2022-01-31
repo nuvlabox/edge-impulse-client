@@ -69,4 +69,4 @@ RUN apt remove -y ninja-build wget \
 
 WORKDIR /opt
 
-COPY collect-and-upload.py start-collector.sh ./
+COPY collect-and-upload.py start-collector.sh runner.sh ./
