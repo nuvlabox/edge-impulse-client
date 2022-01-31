@@ -13,11 +13,10 @@ RUN DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
     flex \
     gettext \
     libffi-dev \
-    libglib2.0 \
-    libnice-dev \
+    libglib2.0-dev \
     libopus-dev \
     libpcre3-dev \
-    libsrtp-dev \
+#    libsrtp-dev \
     libssl-dev \
     libvpx-dev \
     libx264-dev \
@@ -71,5 +70,3 @@ RUN apt remove -y ninja-build wget \
 WORKDIR /opt
 
 COPY collect-and-upload.py start-collector.sh ./
-
-ENTRYPOINT ["./start-collector.sh"]
