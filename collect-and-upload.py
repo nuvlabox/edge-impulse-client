@@ -61,7 +61,6 @@ def generate_metadata(image_file):
 
 
 cap = cv2.VideoCapture("/dev/video0")
-ret,frame = cap.read()
 e = Event()
 headers = {
     'x-api-key': ei_api_key,
@@ -70,6 +69,8 @@ headers = {
 
 while True:
     start = time.time()
+    ret, frame = cap.read()
+
     img_name = f'{label_name}_{int(start)}.jpg'
     cv2.imwrite(img_name,frame)
 
