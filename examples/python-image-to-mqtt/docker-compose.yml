@@ -13,4 +13,4 @@ services:
       - /dev/video0
     environment:
       - EI_API_KEY=${EI_API_KEY}
-    command: model.eim /dev/video0
+    command: /dev/video0
