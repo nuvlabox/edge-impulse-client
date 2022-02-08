@@ -3,6 +3,7 @@
 # import device_patches       # Device specific patches for Jetson Nano (needs to be before importing cv2)
 
 import cv2
+import logging
 import os
 import paho.mqtt.client as mqtt
 import socket
@@ -21,7 +22,7 @@ def now():
 def get_webcams():
     for port in range(5):
         video_device = f'/dev/video{port}'
-        print(f"Looking for a camera {video_device}")
+        logging.info(f"Looking for a camera {video_device}")
         camera = cv2.VideoCapture(port)
         if camera.isOpened():
             ret = camera.read()[0]
@@ -29,7 +30,7 @@ def get_webcams():
                 backendName = camera.getBackendName()
                 w = camera.get(3)
                 h = camera.get(4)
-                print("Camera %s (%s x %s) found in port %s " %(backendName,h,w, port))
+                logging.info("Camera %s (%s x %s) found in port %s " %(backendName,h,w, port))
 
                 camera.release()
                 return video_device
@@ -61,13 +62,13 @@ def main(argv):
     try:
         client.connect(broker_address)
     except socket.gaierror:
-        print(f'ERROR: you must be container to the same network as the MQTT broker: {broker_address}')
+        logging.error(f'ERROR: you must be container to the same network as the MQTT broker: {broker_address}')
         sys.exit(2)
 
     with ImageImpulseRunner(modelfile) as runner:
         try:
             model_info = runner.init()
-            print('Loaded runner for "' + model_info['project']['owner'] + ' / ' + model_info['project']['name'] + '"')
+            logging.info('Loaded runner for "' + model_info['project']['owner'] + ' / ' + model_info['project']['name'] + '"')
             # labels = model_info['model_parameters']['labels']
             if len(args) >= 1:
                 videoCaptureDeviceId = args[0]
@@ -82,17 +83,17 @@ def main(argv):
                 backendName = camera.getBackendName()
                 w = camera.get(3)
                 h = camera.get(4)
-                print("Camera %s (%s x %s) from %s selected." %(backendName,h,w, videoCaptureDeviceId))
+                logging.info("Camera %s (%s x %s) from %s selected." %(backendName,h,w, videoCaptureDeviceId))
                 camera.release()
             else:
                 raise Exception("Couldn't initialize selected camera.")
 
             for res, img in runner.classifier(videoCaptureDeviceId):
                 if "bounding_boxes" in res["result"].keys():
-                    print('Found %d bounding boxes (%d ms.)' % (len(res["result"]["bounding_boxes"]), res['timing']['dsp'] + res['timing']['classification']))
+                    logging.info('Found %d bounding boxes (%d ms.)' % (len(res["result"]["bounding_boxes"]), res['timing']['dsp'] + res['timing']['classification']))
                     for bb in res["result"]["bounding_boxes"]:
                         msg = f"{bb['label']} ({bb['value']}): x={bb['x']} y={bb['y']} w={bb['width']} h={bb['height']}"
-                        print(f'\t{msg}')
+                        logging.info(f'\t{msg}')
                         client.publish("demo", msg)
                         # img = cv2.rectangle(img, (bb['x'], bb['y']), (bb['x'] + bb['width'], bb['y'] + bb['height']), (255, 0, 0), 1)
 
