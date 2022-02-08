@@ -6,7 +6,7 @@ networks:
 
 services:
   object-recognition:
-    image: nuvladev/ei-python-to-mqtt
+    build: .
     networks:
       - nuvlabox-shared-network
     devices:
