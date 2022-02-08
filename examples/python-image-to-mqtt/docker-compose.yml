@@ -1,0 +1,16 @@
+version: "3"
+
+networks:
+  nuvlabox-shared-network:
+    external: true
+
+services:
+  object-recognition:
+    image: nuvladev/ei-python-to-mqtt
+    networks:
+      - nuvlabox-shared-network
+    devices:
+      - /dev/video0
+    environment:
+      - EI_API_KEY=${EI_API_KEY}
+    command: model.eim /dev/video0

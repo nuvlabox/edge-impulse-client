@@ -5,9 +5,13 @@
 import cv2
 import os
 import paho.mqtt.client as mqtt
+import socket
 import sys, getopt
 import time
 from edge_impulse_linux.image import ImageImpulseRunner
+
+
+model = 'model.eim'
 
 
 def now():
@@ -34,7 +38,7 @@ def get_webcams():
 
 
 def helper():
-    print('./obj-rec-2-mqtt.py <path_to_model.eim> <fps> <video device path. uses the 1st available, if not provided>')
+    print('./obj-rec-2-mqtt.py <video device path. uses the 1st available, if not provided>')
 
 
 def main(argv):
@@ -49,26 +53,24 @@ def main(argv):
             helper()
             sys.exit()
 
-    if len(args) == 0:
-        help()
-        sys.exit(2)
-
-    model = args[0]
-
     dir_path = os.path.dirname(os.path.realpath(__file__))
     modelfile = os.path.join(dir_path, model)
 
     broker_address = "data-gateway"
     client = mqtt.Client("P1")
-    client.connect(broker_address)
+    try:
+        client.connect(broker_address)
+    except socket.gaierror:
+        print(f'ERROR: you must be container to the same network as the MQTT broker: {broker_address}')
+        sys.exit(2)
 
     with ImageImpulseRunner(modelfile) as runner:
         try:
             model_info = runner.init()
             print('Loaded runner for "' + model_info['project']['owner'] + ' / ' + model_info['project']['name'] + '"')
             # labels = model_info['model_parameters']['labels']
-            if len(args) >= 2:
-                videoCaptureDeviceId = int(args[1])
+            if len(args) >= 1:
+                videoCaptureDeviceId = int(args[0])
             else:
                 videoCaptureDeviceId = get_webcams()
                 if not videoCaptureDeviceId:
@@ -102,4 +104,5 @@ def main(argv):
 
 
 if __name__ == "__main__":
+    os.system(f'edge-impulse-linux-runner --api-key {os.getenv("EI_API_KEY")} --download {model}')
     main(sys.argv[1:])
