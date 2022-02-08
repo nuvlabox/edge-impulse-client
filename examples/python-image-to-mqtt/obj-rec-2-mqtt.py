@@ -70,7 +70,7 @@ def main(argv):
             print('Loaded runner for "' + model_info['project']['owner'] + ' / ' + model_info['project']['name'] + '"')
             # labels = model_info['model_parameters']['labels']
             if len(args) >= 1:
-                videoCaptureDeviceId = int(args[0])
+                videoCaptureDeviceId = args[0]
             else:
                 videoCaptureDeviceId = get_webcams()
                 if not videoCaptureDeviceId:
