@@ -7,11 +7,6 @@ COPY requirements.txt ./
 
 RUN pip3 install -r requirements.txt
 
-
-FROM python:3.7-slim
-
-COPY --from=builder /usr/local/lib/python3.7/site-packages /usr/local/lib/python3.7/site-packages
-
 RUN apt update \
     && apt install -y curl \
     && curl -sL https://deb.nodesource.com/setup_12.x -O \
