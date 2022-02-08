@@ -21,7 +21,7 @@ RUN apt update \
     && apt remove -y curl \
     && apt clean \
     && apt autoremove -y --purge \
-    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN npm config set user root \
     && npm install edge-impulse-linux -g --unsafe-perm
