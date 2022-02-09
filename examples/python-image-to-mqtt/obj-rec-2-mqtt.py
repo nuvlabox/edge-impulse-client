@@ -57,8 +57,9 @@ def main(argv):
     dir_path = os.path.dirname(os.path.realpath(__file__))
     modelfile = os.path.join(dir_path, model)
 
-    broker_address = "data-gateway"
-    client = mqtt.Client("P1")
+    broker_address = os.getenv('MQTT_HOST', 'data-gateway')
+    broker_topic = os.getenv('MQTT_TOPIC', 'demo')
+    client = mqtt.Client("obj-rec-2-mqtt")
     try:
         client.connect(broker_address)
     except socket.gaierror:
@@ -94,7 +95,7 @@ def main(argv):
                     for bb in res["result"]["bounding_boxes"]:
                         msg = f"{bb['label']} ({bb['value']}): x={bb['x']} y={bb['y']} w={bb['width']} h={bb['height']}"
                         logging.info(f'\t{msg}')
-                        client.publish("demo", msg)
+                        client.publish(broker_topic, msg)
                         # img = cv2.rectangle(img, (bb['x'], bb['y']), (bb['x'] + bb['width'], bb['y'] + bb['height']), (255, 0, 0), 1)
 
         finally:
