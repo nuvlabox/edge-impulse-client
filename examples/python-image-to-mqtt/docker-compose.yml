@@ -13,4 +13,7 @@ services:
       - /dev/video0
     environment:
       - EI_API_KEY=${EI_API_KEY}
+      - BLACKBOX_TRIGGER_LABELS=${BLACKBOX_TRIGGER_LABELS}
+      - MQTT_HOST=${MQTT_HOST}
+      - MQTT_TOPIC=${MQTT_TOPIC}
     command: /dev/video0

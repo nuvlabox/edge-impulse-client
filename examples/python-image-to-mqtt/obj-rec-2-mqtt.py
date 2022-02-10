@@ -9,6 +9,7 @@ import paho.mqtt.client as mqtt
 import socket
 import sys, getopt
 import time
+from collections import Counter
 from edge_impulse_linux.image import ImageImpulseRunner
 
 
@@ -63,7 +64,7 @@ def main(argv):
     try:
         client.connect(broker_address)
     except socket.gaierror:
-        logging.error(f'ERROR: you must be container to the same network as the MQTT broker: {broker_address}')
+        logging.error(f'ERROR: you must be in the same network as the MQTT broker: {broker_address}')
         sys.exit(2)
 
     with ImageImpulseRunner(modelfile) as runner:
@@ -89,13 +90,49 @@ def main(argv):
             else:
                 raise Exception("Couldn't initialize selected camera.")
 
+            found = {}
+            tolerance = {}
+            max_tolerance_per_label = 3   # used so that if an object leaves the frame, we don't immediately trigger an alert, and instead wait for N more equal frames
+            alerting_labels = os.getenv('BLACKBOX_TRIGGER_LABELS')
             for res, img in runner.classifier(videoCaptureDeviceId):
                 if "bounding_boxes" in res["result"].keys():
                     logging.info('Found %d bounding boxes (%d ms.)' % (len(res["result"]["bounding_boxes"]), res['timing']['dsp'] + res['timing']['classification']))
+                    found_new = Counter(map(lambda f: f['label'], res["result"]["bounding_boxes"]))
+                    if alerting_labels:
+                        alerts = []
+                        for f_label in set.union(set(found), set(found_new)):
+                            if f_label not in alerting_labels.split(',') and alerting_labels != "all":
+                                continue
+
+                            previous_count = found.get(f_label, 0)
+                            new_count = found_new.get(f_label, 0)
+
+                            if new_count > previous_count:
+                                msg = f'{new_count-previous_count} new "{f_label}"(s) detected'
+                            elif new_count < previous_count:
+                                tolerance[f_label] -= 1
+                                if tolerance[f_label] <= 0:
+                                    msg = f'{previous_count-new_count} "{f_label}"(s) no longer detected'
+                                    tolerance[f_label] = max_tolerance_per_label
+                                else:
+                                    continue
+                            else:
+                                msg = None
+
+                            if msg:
+                                client.publish(broker_topic, msg)
+                                alerts.append(msg)
+
+                            found[f_label] = new_count
+                            tolerance[f_label] = max_tolerance_per_label
+
+                        if alerts:
+                            client.publish('blackbox/record', 'Alert')
+
                     for bb in res["result"]["bounding_boxes"]:
                         msg = f"{bb['label']} ({bb['value']}): x={bb['x']} y={bb['y']} w={bb['width']} h={bb['height']}"
                         logging.info(f'\t{msg}')
-                        client.publish(broker_topic, msg)
+                        # client.publish(broker_topic, msg)
                         # img = cv2.rectangle(img, (bb['x'], bb['y']), (bb['x'] + bb['width'], bb['y'] + bb['height']), (255, 0, 0), 1)
 
         finally:
