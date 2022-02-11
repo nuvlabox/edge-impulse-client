@@ -92,7 +92,7 @@ def main(argv):
 
             found = {}
             tolerance = {}
-            max_tolerance_per_label = 3   # used so that if an object leaves the frame, we don't immediately trigger an alert, and instead wait for N more equal frames
+            max_tolerance_per_label = os.getenv('NO_DETECTION_TOLERANCE', 5)   # used so that if an object leaves the frame, we don't immediately trigger an alert, and instead wait for N more equal frames
             alerting_labels = os.getenv('BLACKBOX_TRIGGER_LABELS')
             for res, img in runner.classifier(videoCaptureDeviceId):
                 if "bounding_boxes" in res["result"].keys():

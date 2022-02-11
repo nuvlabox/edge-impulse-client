@@ -14,5 +14,5 @@ in or out of the frame, it also triggers an alert to the BlackBox topic.
 
 **EI_API_KEY**: API key to access the Edge Impulse project and download the data processing model.
 
-
+**NO_DETECTION_TOLERANCE**: After how many frames without detecting an object, will it be considered as exited from the frame? Default is 5.
 
