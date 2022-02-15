@@ -24,12 +24,17 @@ COPY --from=base /tmp/setup_12.x ./setup_12.x
 
 RUN bash setup_12.x
 
+# gcc g++ and make are needing to build NPM dependencies in the next layer
+# TODO: install edge-impulse-linux and then copy the node modules to a clean stage without these build packages
 RUN apt update && \
     apt-get install -y ffmpeg \
                     libsm6 \
                     libxext6 \
                     portaudio19-dev \
-                    nodejs && \
+                    nodejs \
+                    gcc \
+                    g++ \
+                    make && \
     apt clean && \
     apt autoremove -y --purge && \
     rm -rf /var/lib/apt/lists/* && \
