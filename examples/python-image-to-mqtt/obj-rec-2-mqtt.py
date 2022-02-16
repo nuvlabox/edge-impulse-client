@@ -12,6 +12,7 @@ import time
 from collections import Counter
 from edge_impulse_linux.image import ImageImpulseRunner
 
+logging.basicConfig()
 
 model = 'model.eim'
 
