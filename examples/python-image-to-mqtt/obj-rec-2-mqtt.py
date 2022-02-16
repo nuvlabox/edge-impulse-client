@@ -13,6 +13,7 @@ from collections import Counter
 from edge_impulse_linux.image import ImageImpulseRunner
 
 logging.basicConfig()
+logging.getLogger().setLevel(logging.INFO)
 
 model = 'model.eim'
 
