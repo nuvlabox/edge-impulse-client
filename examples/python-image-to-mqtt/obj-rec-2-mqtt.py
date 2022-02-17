@@ -114,8 +114,10 @@ def main(argv):
                                 tolerance[f_label] = max_tolerance_per_label
                             elif new_count < previous_count:
                                 tolerance[f_label] -= 1
+                                logging.warning(f'{f_label} left. tolerance= {tolerance[f_label]}')
                                 if tolerance[f_label] <= 0:
                                     msg = f'{previous_count-new_count} "{f_label}"(s) no longer detected'
+                                    logging.warning(msg)
                                     tolerance[f_label] = max_tolerance_per_label
                                 else:
                                     continue
