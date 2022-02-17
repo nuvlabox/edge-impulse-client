@@ -111,6 +111,7 @@ def main(argv):
 
                             if new_count > previous_count:
                                 msg = f'{new_count-previous_count} new "{f_label}"(s) detected'
+                                tolerance[f_label] = max_tolerance_per_label
                             elif new_count < previous_count:
                                 tolerance[f_label] -= 1
                                 if tolerance[f_label] <= 0:
@@ -126,7 +127,6 @@ def main(argv):
                                 alerts.append(msg)
 
                             found[f_label] = new_count
-                            tolerance[f_label] = max_tolerance_per_label
 
                         if alerts:
                             client.publish('blackbox/record', 'Alert')
