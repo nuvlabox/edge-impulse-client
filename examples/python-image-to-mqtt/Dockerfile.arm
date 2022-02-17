@@ -5,7 +5,9 @@ RUN apt update && \
                 build-essential  \
                 make \
                 portaudio19-dev \
-                curl
+                curl \
+                cmake \
+                libssl-dev
 
 COPY requirements.txt ./
 
