@@ -64,7 +64,7 @@ def main(argv):
     broker_topic = os.getenv('MQTT_TOPIC', 'demo')
     client = mqtt.Client("obj-rec-2-mqtt")
     try:
-        client.connect(broker_address)
+        client.connect(broker_address, keepalive=3600)
     except socket.gaierror:
         logging.error(f'ERROR: you must be in the same network as the MQTT broker: {broker_address}')
         sys.exit(2)
@@ -97,6 +97,9 @@ def main(argv):
             max_tolerance_per_label = int(os.getenv('NO_DETECTION_TOLERANCE', 5))   # used so that if an object leaves the frame, we don't immediately trigger an alert, and instead wait for N more equal frames
             alerting_labels = os.getenv('BLACKBOX_TRIGGER_LABELS')
             for res, img in runner.classifier(videoCaptureDeviceId):
+                if not client.is_connected():
+                    client.reconnect()
+
                 if "bounding_boxes" in res["result"].keys():
                     logging.info('Found %d bounding boxes (%d ms.)' % (len(res["result"]["bounding_boxes"]), res['timing']['dsp'] + res['timing']['classification']))
                     found_new = Counter(map(lambda f: f['label'], res["result"]["bounding_boxes"]))
